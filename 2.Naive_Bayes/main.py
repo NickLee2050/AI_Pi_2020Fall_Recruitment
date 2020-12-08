@@ -52,12 +52,15 @@ def ReadSingleMail(file_addr, st_addr):
 
 
 def Corelate(spam_stat, ham_stat):
+    # this function looks for words both appear in ham & spam e-mails
     spam_dict = {}
     ham_dict = {}
     for item in spam_stat:
         spam_dict[item[0]] = item[1]
     for item in ham_stat:
         ham_dict[item[0]] = item[1]
+    # here we create a new dictionary to do content-based mapping,
+    # for the convenience of "in" boolean operation
     spam_list_new = []
     ham_list_new = []
     for item in spam_stat:
@@ -66,20 +69,24 @@ def Corelate(spam_stat, ham_stat):
     for item in ham_stat:
         if item[0] in spam_dict:
             ham_list_new.append(item)
+    # corelate process
     return spam_list_new, ham_list_new
 
 
 def Predict(file_addr, st_addr, spam_dict, ham_dict, spam_ratio):
     read_stat = ReadSingleMail(file_addr, st_addr)
-    possibility = [math.log(1-spam_ratio), math.log(spam_ratio)]
+    possibility = [math.log(1 - spam_ratio), math.log(spam_ratio)]
+    # overall logarithm possibility
     for item in read_stat:
         if (item[0] in ham_dict) & (item[0] in spam_dict):
             possibility[0] += item[1] * ham_dict[item[0]]
             possibility[1] += item[1] * spam_dict[item[0]]
+    # use polynomial feature to make predictions
     if possibility[0] > possibility[1]:
         return 0
     else:
         return 1
+    # possibility-bool mapping
 
 
 start = time.clock()
